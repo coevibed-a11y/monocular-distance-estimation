@@ -4,11 +4,32 @@
 
 기존의 단순 Bounding Box 검출을 넘어, **AI 모델의 회귀(Regression) 예측과 기하학적(Geometry) 연산을 결합한 하이브리드 로직**을 통해 안정적인 거리 데이터를 추출합니다.
 
+### 📊 System Overview
+* **Input:** 단일 RGB 카메라 영상 (Monocular Camera Stream)
+* **Output:** - 실시간 2D 객체 검출 (Object Detection)
+  - 단일 카메라 기반 종방향 상대 거리 추정 (Distance Regression)
+  - 인접 차선 차량의 컷인(Cut-in) 위험도 판별
+  - 2D 이미지 좌표의 BEV(Bird's Eye View) 공간 투영 및 실시간 시각화
+
 ## 📌 주요 기능 (Key Features)
 * **Custom ROI Head (DistanceROIHeads):** Detectron2 기반 Mask R-CNN 구조를 확장하여, Bounding Box 예측과 동시에 거리를 직접 추론(Regression)하도록 Head 커스터마이징.
 * **Hybrid Distance Logic:** 모델이 예측한 거리(AI)와 카메라 캘리브레이션/소실점 기반 거리(Math)를 융합하여 오차 최소화.
 * **Cut-in (끼어들기) 감지:** 주행 코리더(Safety Corridor)와 객체 중심점, Mask IOU를 분석하여 측면 차량의 차선 진입(Entering) 여부 판별.
 * **실시간 대시보드 (Live Demo):** FastAPI 기반 웹 스트리밍, BEV(Bird's Eye View) 미니맵, 3단계 위험 경고 (Danger / Caution / Safe) 시각화.
+
+### 🛠️ Key Engineering Contributions (Main Developer)
+* **이기종 데이터 정합 파이프라인 독자 구축**
+  - 3D Point Cloud/라벨 데이터를 카메라 캘리브레이션 매트릭스($Extrinsic \times Intrinsic$) 기하 연산을 통해 2D 평면으로 정밀 투영(Projection)하는 파이프라인 구현.
+  - 센서 간 오차 보정을 위해 IoU 0.5 임계값 기반의 데이터 정합(Data Association) 알고리즘을 설계하여 2D 데이터 내 실제 거리($Distance$) 값 무결성 주입.
+* **Detectron2 Custom ROI Head 개전 및 커스텀 로스 설계**
+  - 국소 영역 특징 추정 강화를 위해 Detectron2 구조 내부의 ROI Head를 수정하여 거리 추정 전용 Regression 헤드를 추가 바인딩하고 Loss 함수 커스텀 설계.
+* **실시간 스트리밍 라이브 데모 및 시스템화**
+  - 학습 완료된 딥러닝 체크포인트를 FastAPI 백엔드 아키텍처와 연동하여 저지연 실시간 스트리밍(Live Demo) 환경 및 웹 기반 시각화 파이프라인 검증 완료.
+
+### 📈 Performance Metrics
+* **Inference Speed:** 평균 `XX FPS` (구동 환경: 로컬 GPU RTX XXXX 기준)
+* **Distance Estimation Accuracy (MAE):** - 단거리(0~10m) 구간: 평균 `X.X m` 오차 범위 이내
+  - 중거리(10~30m) 구간: 평균 `X.X m` 오차 범위 이내
 
 ## 📂 디렉토리 구조 (Directory Structure)
 ```text
