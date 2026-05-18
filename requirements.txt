@@ -1,0 +1,8 @@
+torch
+torchvision
+opencv-python
+numpy
+tqdm
+fastapi
+uvicorn
+# detectron2는 공식 문서 참조 후 별도 설치 권장

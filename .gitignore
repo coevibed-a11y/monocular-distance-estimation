@@ -1,0 +1,4 @@
+# Weights & Large Result Files
+*.pth
+*.pt
+results/**/*.json
